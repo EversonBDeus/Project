@@ -10,7 +10,9 @@ export default defineNuxtConfig({
       include: undefined,
       exclude: ['/register'],
       cookieRedirect: false,
-    }
+    },
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_KEY,
   },
   
 })
