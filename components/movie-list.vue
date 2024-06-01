@@ -6,14 +6,15 @@
     </template>
 
     <Placeholder class="h-32" />
-    <UInput class="mb-5" />
+    <UInput class="mb-5" 
+    v-model="searchQuery"/>
 
     <hr />
 
     <!-------------Filmes --------------->
     <div class="container">
       <div
-        v-for="(movie, index) in movies"
+        v-for="(movie, index) in filteredMovies"
         :key="index"
         class="container__filmes"
       >
@@ -83,6 +84,7 @@ const supabase = useSupabaseClient();
 const apiKey = "d4de4034ccd9c788a224b01db7627f20";
 const apiUrl = "https://api.themoviedb.org/3/movie/popular";
 const movies = ref([]);
+const searchQuery = ref('');
 console.log(user);
 onMounted(async () => {
   try {
@@ -93,6 +95,25 @@ onMounted(async () => {
     console.error("Error fetching movies:", error);
   }
 });
+const filteredMovies = computed(() => {
+  // Verifica se há uma consulta de pesquisa
+  if (searchQuery.value.length === 0) {
+    // Se não houver consulta, retorna todos os filmes
+    return movies.value;
+  } else {
+ // Converte a consulta de pesquisa para minúsculas
+
+
+ const lowercaseQuery = searchQuery.value.toLowerCase();
+  return movies.value.filter(movie =>
+    movie.title.toLowerCase().includes(lowercaseQuery)
+  );
+
+  
+  }
+  
+});
+
 
 // Método para lidar com o clique no botão de favorito
 const handleFavorite = async (movieId, listType) => {
@@ -139,23 +160,44 @@ const handleFavorite = async (movieId, listType) => {
       return;
     }
 
-    // Atualiza a tabela 'profiles' com a lista atualizada
-    const updateObject = {};
-    updateObject[listType] = list; // Define a propriedade de atualização com base no tipo de lista
+
+  
+
+    // Cria uma cópia do objeto genreswatched existente
+    const existingGenresWatched = profileData.genreswatched || {};
+
+ // Obter os gêneros do filme
+ const movieGenres = movies.value.find(movie => movie.id === movieId)?.genre_ids || [];
+
+// Mescla os gêneros assistidos existentes com os novos gêneros
+const genreswatched = { ...profileData.genreswatched }; // Faz uma cópia dos gêneros assistidos existentes
+movieGenres.forEach(genreId => {
+  const genreName = genres[genreId];
+  genreswatched[genreName] = (genreswatched[genreName] || 0) + 1; // Incrementa o contador
+});
+    console.log("Genreswatched antes de atualizar:", genreswatched);
+
+    // Atualiza a tabela 'profiles' com as listas atualizadas
+    const updateObject = {
+      [listType]: list, // Define a propriedade de atualização com base no tipo de lista
+      genreswatched: genreswatched // Atualiza 'genreswatched'
+    };
+
     const { data: updatedProfileData, error: updateError } = await supabase
       .from("profiles")
-      .update(updateObject) // Atualiza a propriedade correspondente
+      .update(updateObject) // Atualiza as propriedades correspondentes
       .eq("id", profileId);
 
     if (updateError) {
       throw updateError;
     }
 
-    console.log("Filme adicionado à lista:", movieId, listType);
+    console.log("Filme adicionado à lista e genreswatched atualizado:", movieId, listType, genreswatched);
   } catch (error) {
     console.error("Erro ao adicionar o filme à lista:", error.message);
   }
 };
+
 
 const genres = {
   12: "Adventure",

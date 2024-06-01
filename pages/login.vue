@@ -43,14 +43,14 @@ const email = ref('');
 const password = ref('');
 const errorMsg = ref('');
 const { auth } = useSupabaseClient();
-useRedirectIfAuthenticated()
+
 const userLogin = async () => {
   try {
     const { error } = await auth.signInWithPassword({
       email: email.value,
       password: password.value,
       options:{
-        emailRedirectTo:'http:;;localhost:3000/confirm'
+        emailRedirectTo:'http//localhost:3000/confirm'
       }
     });
 
@@ -65,6 +65,11 @@ const userLogin = async () => {
     }, 3000);
   }
 };
+watchEffect(() => {
+  if (user.value) {
+    return navigateTo('/');
+  }
+});
 
 
 

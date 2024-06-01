@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+const supabase = useSupabaseClient();
 const selectedProfile = ref(null);
 const profileId = selectedProfile.id;
 const apiKey = "d4de4034ccd9c788a224b01db7627f20";
@@ -101,6 +102,13 @@ const isOpenWatchlist = ref(false);
 const favoriteMoviesDetails = ref([]);
 const watchlistMoviesDetail = ref([]);
 const watchedMoviesDetails = ref([]);
+const profileIds = ref([]);
+const profileNames = ref([]);
+const people = ref([]);
+const favoriteMovies = ref([]);
+const watchlistMovies = ref([]);
+const watchedMovies = ref([]);
+const selected = ref(null);
 
 const addToWatched = async (movieId) => {
   const profileId = selectedProfile.value.id;
@@ -155,20 +163,6 @@ const addToWatched = async (movieId) => {
   }
 };
 
-
-
-
-
-const supabase = useSupabaseClient();
-
-// Arrays separados para armazenar IDs e nomes dos perfis
-const profileIds = ref([]);
-const profileNames = ref([]);
-const people = ref([]);
-const favoriteMovies = ref([]);
-const watchlistMovies = ref([]);
-const watchedMovies = ref([]);
-const selected = ref(null);
 
 
 watch(selected, (newValue) => {
