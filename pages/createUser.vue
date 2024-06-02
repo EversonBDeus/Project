@@ -32,9 +32,7 @@
 
 <script setup >
 
-definePageMeta({
-  middleware: 'auth',
-});
+c
 
 
 </script>

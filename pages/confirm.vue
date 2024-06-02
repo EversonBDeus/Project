@@ -11,7 +11,12 @@
 </template>
 
 <script setup>
-useRedirectIfAuthenticated()
+   setTimeout(() => {
+    useRedirectIfAuthenticated()
+       
+    }, 1000);
+    
+
 
 </script>
 

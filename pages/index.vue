@@ -23,7 +23,10 @@
           <!-------------Filmes conteudo--------------->
           <h2 class="text-lg font-bold mb-4">{{ movie.title }}</h2>
           <p class="mb-4 text-xs">{{ movie.overview }}</p>
-          <div class="flex space-x-4 mb-8"></div>
+          <div class="flex space-x-4 mb-8">
+            <UButton @click="shareOnFacebook(movie)">Compartilhar no Facebook</UButton>
+
+          </div>
           <div class="movie-image-container">
             <img
               class="movie-image"
@@ -109,6 +112,21 @@ const favoriteMovies = ref([]);
 const watchlistMovies = ref([]);
 const watchedMovies = ref([]);
 const selected = ref(null);
+definePageMeta({
+  middleware: 'auth',
+});
+
+const shareOnFacebook = (movie) => {
+  const movieUrl = `https://www.themoviedb.org/movie/${movie.id}`; // URL do filme no The Movie DB
+  const shareTitle = encodeURIComponent(movie.title);
+  const shareDescription = encodeURIComponent(movie.overview);
+  const shareImage = encodeURIComponent(`https://image.tmdb.org/t/p/w500/${movie.poster_path}`);
+  const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(movieUrl)}&quote=${shareTitle}: ${shareDescription}`;
+  window.open(shareUrl, '_blank');
+}
+
+
+
 
 const addToWatched = async (movieId) => {
   const profileId = selectedProfile.value.id;
@@ -165,15 +183,43 @@ const addToWatched = async (movieId) => {
 
 
 
-watch(selected, (newValue) => {
+watch(selected, async (newValue) => {
   // Encontre o perfil selecionado com base no ID
   selectedProfile.value = people.value.find(
     (profile) => profile.id === newValue
   );
-  if (selectedProfile.value) {
-    fetchMoviesFromProfile(); // Chama a função apenas se o perfil selecionado for válido
+
+  // Verifica se o perfil selecionado tem um PIN
+  try {
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("userpin")
+      .eq("id", newValue)
+      .single();
+
+    if (profileError) {
+      throw profileError;
+    }
+
+    // Se houver um PIN, pedir ao usuário que insira
+    if (profileData && profileData.userpin) {
+      const enteredPin = prompt("Por favor, insira o PIN:");
+      // Verifica se o PIN inserido corresponde ao PIN armazenado
+      if (enteredPin !== profileData.userpin) {
+        alert("PIN incorreto. Tente novamente.");
+        return;
+      }
+    }
+    
+    // Se não houver PIN ou se o PIN estiver correto, continuar mostrando os dados
+    if (selectedProfile.value) {
+      fetchMoviesFromProfile(); // Chama a função apenas se o perfil selecionado for válido
+    }
+  } catch (error) {
+    console.error("Erro ao buscar o PIN do perfil:", error.message);
   }
 });
+
 
 const fetchProfiles = async () => {
   try {
@@ -198,14 +244,12 @@ const fetchProfiles = async () => {
     people.value = profileIds.value.map((id, index) => ({
       id,
       name: profileNames.value[index],
+     
     }));
 
   
 
-    // Defina o primeiro perfil como selecionado após recuperar os perfis
-    if (people.value.length > 0) {
-      selected.value = people.value[0].id;
-    }
+   
   } catch (error) {
     console.error("Erro ao buscar os perfis:", error.message);
   }
@@ -269,7 +313,7 @@ onMounted(async () => {
     console.error("Error fetching movies:", error);
   }
 });
-onMounted(fetchProfiles);
+onMounted(fetchProfiles)
 </script>
 
 <style>

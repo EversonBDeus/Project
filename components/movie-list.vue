@@ -155,6 +155,7 @@ const handleFavorite = async (movieId, listType) => {
     // Adiciona o movieId à lista, se ainda não estiver presente
     if (!list.includes(movieId)) {
       list.push(movieId);
+      window.location.reload(); // Recarrega a página
     } else {
       console.log("Filme já está na lista:", movieId);
       return;

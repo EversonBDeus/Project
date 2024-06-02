@@ -3,10 +3,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxt/ui", "@nuxtjs/supabase"],
   supabase:{
-    redirect:true,
+    redirect:false,
     redirectOptions: {
       login: '/login',
-      callback: '/conirm',
+      callback: 'http://localhost:3000/',
       include: undefined,
       exclude: ['/register'],
       cookieRedirect: false,

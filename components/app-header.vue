@@ -48,6 +48,9 @@
       <UFormGroup   class="mb-5" label="Nome " name="nome" >
           <UInput v-model="profilename" required />
         </UFormGroup>
+        <UFormGroup  v-if="profiles.length === 0" class="mb-5" label="Pin " name="Pin" >
+          <UInput type="password" v-model="userpin" required />
+        </UFormGroup>
        
         <UButton type="submit" label="Criar" color="gray" block  :loading="loading" :disabled="loading"/>
     </form>
@@ -107,7 +110,6 @@ const userLogout = async () => {
 };
 
 
-
 const createProfile = async () => {
   try {
     // Consulta o número de perfis existentes
@@ -129,22 +131,26 @@ const createProfile = async () => {
     
     // Insere o novo perfil
     const { error: insertError } = await supabase.from('profiles').insert({
-      profilename: profilename.value, // Adiciona o valor do input à coluna 'profilename'
+      profilename: profilename.value,
+      userpin: userpin.value // Adiciona o valor do input à coluna 'profilename'
     });
 
     if (insertError) {
       throw insertError;
     } else {
       console.log('Perfil criado com sucesso!');
+      window.location.reload(); // Recarrega a página
     }
   } catch (error) {
     console.error('Erro ao criar o perfil:', error.message);
   } finally {
     loading.value = false;
     isOpenProfileForm.value = false; // Fecha o formulário após a submissão
+
   }
 };
 
+// Função para buscar os perfis
 const fetchProfiles = async () => {
   try {
     const { data, error } = await supabase.from('profiles').select('id, profilename');
@@ -156,6 +162,7 @@ const fetchProfiles = async () => {
     console.error('Erro ao buscar os perfis:', error.message);
   }
 };
+
 
 
 onMounted(fetchProfiles);

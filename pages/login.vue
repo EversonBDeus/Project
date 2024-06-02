@@ -26,7 +26,7 @@
       <UDivider label="OR" orientation="vertical" />
 
       <div class="space-y-4 flex flex-col justify-center">
-        <UButton color="black" label="Login with Facebook" icon="i-simple-icons-github" block />
+        <UButton color="black" label="Login with Facebook" icon="i-simple-icons-github" block @click="loginWithFacebook" />
  
       </div>
     </UCard>
@@ -38,11 +38,14 @@
 
 
 const loading = ref(false)
+
 const user = useSupabaseUser();
 const email = ref('');
 const password = ref('');
 const errorMsg = ref('');
 const { auth } = useSupabaseClient();
+
+
 
 const userLogin = async () => {
   try {
@@ -50,8 +53,9 @@ const userLogin = async () => {
       email: email.value,
       password: password.value,
       options:{
-        emailRedirectTo:'http//localhost:3000/confirm'
+        emailRedirectTo:'http://localhost:3000/'
       }
+  
     });
 
     email.value = '';
@@ -65,14 +69,38 @@ const userLogin = async () => {
     }, 3000);
   }
 };
+
+// Função para login com Facebook
+
+const loginWithFacebook = async () => {
+  try {
+    const { data, error } = await auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo: 'http://localhost:3000/confirm'
+      },
+      
+    });
+
+    if (error) {
+      console.error('Erro ao fazer login com o Facebook:', error.message);
+    } else if (data) {
+   
+      
+      console.log('Login foi bem-sucedido:', data.user);
+    
+   
+    }
+  } catch (error) {
+    console.error('Erro ao fazer login com o Facebook:', error.message);
+  }
+};
+
 watchEffect(() => {
   if (user.value) {
     return navigateTo('/');
   }
 });
-
-
-
 </script>
 
 <style lang="scss" scoped>
