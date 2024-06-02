@@ -77,7 +77,7 @@ const loginWithFacebook = async () => {
     const { data, error } = await auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: 'http://localhost:3000/confirm'
+        redirectTo: 'https://project-rori.vercel.app/confirm'
       },
       
     });
